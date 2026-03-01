@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Volume2 } from "lucide-react";
-import { chatHistory as initialChat } from "../data/mockData";
+import { useGame } from "../contexts/GameContext";
+import { getChatMessages, sendChatMessage, runAIResponse } from "../services/api";
 
 /* ── Audio Waveform Indicator ─────────────────── */
 function AudioIndicator() {
@@ -54,9 +55,25 @@ function ChatMessage({ msg }) {
 
 /* ── DM Console (Right Panel) ─────────────────── */
 export default function DMConsole() {
-    const [messages, setMessages] = useState(initialChat);
+    const { gameId } = useGame();
+    const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
+    const [isThinking, setIsThinking] = useState(false);
     const scrollRef = useRef(null);
+
+    // Initial load of messages
+    useEffect(() => {
+        if (!gameId) return;
+        getChatMessages(gameId).then(data => {
+            // Map the API schema to our UI schema
+            const history = data.map(msg => ({
+                id: msg.id,
+                sender: msg.message.role === 'user' ? 'player' : 'dm',
+                text: msg.message.content
+            }));
+            setMessages(history);
+        }).catch(err => console.error("Failed to load history", err));
+    }, [gameId]);
 
     /* Auto-scroll to bottom on new messages */
     useEffect(() => {
@@ -65,27 +82,35 @@ export default function DMConsole() {
         }
     }, [messages]);
 
-    const handleSend = () => {
-        if (!input.trim()) return;
-        const newMsg = {
-            id: messages.length + 1,
-            sender: "player",
-            text: input.trim(),
-        };
-        setMessages((prev) => [...prev, newMsg]);
+    const handleSend = async () => {
+        if (!input.trim() || isThinking || !gameId) return;
+        const userText = input.trim();
         setInput("");
 
-        /* Simulated DM response after a delay */
-        setTimeout(() => {
-            setMessages((prev) => [
-                ...prev,
-                {
-                    id: prev.length + 1,
-                    sender: "dm",
-                    text: "The shadows in the tavern seem to shift as you speak. The bard's music falters for a moment before picking back up. Something has changed in the air — an almost imperceptible tension, like the quiet before a storm. Vex notices it too, their hand drifting to the blade at their hip.",
-                },
-            ]);
-        }, 2000);
+        // Optimistic UI update for user message
+        const optimisticUserMsg = { id: Date.now(), sender: "player", text: userText };
+        setMessages((prev) => [...prev, optimisticUserMsg]);
+
+        try {
+            await sendChatMessage(gameId, userText);
+
+            // Prepare a placeholder for the streaming DM response
+            setIsThinking(true);
+            const aiMsgId = Date.now() + 1;
+            setMessages((prev) => [...prev, { id: aiMsgId, sender: "dm", text: "" }]);
+
+            // Stream AI Response
+            await runAIResponse(gameId, (chunk, fullText) => {
+                setMessages((prev) =>
+                    prev.map(msg => msg.id === aiMsgId ? { ...msg, text: fullText } : msg)
+                );
+            });
+        } catch (error) {
+            console.error("Failed to fetch AI response", error);
+            setMessages((prev) => [...prev, { id: Date.now(), sender: "dm", text: "_[The DM is temporarily unreachable...]_" }]);
+        } finally {
+            setIsThinking(false);
+        }
     };
 
     const handleKeyDown = (e) => {
@@ -97,8 +122,10 @@ export default function DMConsole() {
 
     return (
         <div className="flex flex-col h-full bg-slate-950 panel-border-l overflow-hidden">
-            {/* ── Audio indicator ──────────────────────── */}
-            <AudioIndicator />
+            {/* ── Audio indicator (Only animate when thinking) ───────── */}
+            <div className={`transition-opacity duration-300 ${isThinking ? 'opacity-100' : 'opacity-30'}`}>
+                <AudioIndicator />
+            </div>
 
             {/* ── Chat log ─────────────────────────────── */}
             <div

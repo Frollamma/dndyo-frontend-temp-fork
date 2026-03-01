@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { character, inventory } from "../data/mockData";
 import ItemIcon from "./ItemIcons";
+import { useGame } from "../contexts/GameContext";
 
 const statIcons = {
     strength: Swords,
@@ -96,7 +97,14 @@ function SectionLabel({ icon: Icon, children }) {
 
 /* ── Character Sheet (Left Panel) ───────────────── */
 export default function CharacterSheet() {
-    const hpPercent = (character.hp.current / character.hp.max) * 100;
+    const { gameState } = useGame();
+
+    // Pull real HP from the backend database if available
+    const playerLiveActor = gameState?.live_actors?.find(la => la.role === "Player");
+    const currentHp = playerLiveActor?.current_hp ?? character.hp.current;
+
+    // Calculate percentages
+    const hpPercent = (currentHp / character.hp.max) * 100;
     const xpPercent = (character.xp.current / character.xp.max) * 100;
 
     return (
@@ -141,13 +149,13 @@ export default function CharacterSheet() {
                             Health
                         </span>
                         <span className="font-serif-dm text-[11px] text-red-200/50 tabular-nums">
-                            {character.hp.current} / {character.hp.max}
+                            {currentHp} / {character.hp.max}
                         </span>
                     </div>
                     <div className="h-3.5 w-full rpg-bar-track overflow-hidden">
                         <div
-                            className={`bar-fill h-full bg-gradient-to-r from-red-900 via-red-600 to-red-500 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] ${character.hp.current < 15 ? "animate-pulse" : ""}`}
-                            style={{ width: `${hpPercent}%` }}
+                            className={`bar-fill h-full bg-gradient-to-r from-red-900 via-red-600 to-red-500 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] ${currentHp < 15 ? "animate-pulse" : ""}`}
+                            style={{ width: `${Math.max(0, hpPercent)}%` }}
                         />
                     </div>
                 </div>

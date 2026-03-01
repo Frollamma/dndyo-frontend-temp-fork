@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Dice5, Skull, Target, Swords } from "lucide-react";
 import { character } from "../data/mockData";
+import { useGame } from "../contexts/GameContext";
 
 /*  Walkable Areas (Static map collision)  */
 const walkableAreas = [
@@ -40,12 +41,44 @@ const isValidMove = (x, y) => {
 };
 
 export default function MainStage() {
+    const { gameState, fetchState } = useGame();
     const [playerPos, setPlayerPos] = useState({ x: 50, y: 80 });
-    const [enemies] = useState([
-        { id: 1, name: "Goblin Raider", hp: 12, maxHp: 15, pos: { x: 38, y: 45 } },
-        { id: 2, name: "Dire Wolf", hp: 20, maxHp: 20, pos: { x: 62, y: 38 } },
-        { id: 3, name: "Cultist", hp: 5, maxHp: 10, pos: { x: 50, y: 22 } },
-    ]);
+    const [enemies, setEnemies] = useState([]);
+
+    // Auto-refresh state periodically to catch AI updates (poor man's SSE for state)
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetchState();
+        }, 3000);
+        return () => clearInterval(interval);
+    }, [fetchState]);
+
+    // Reconcile backend live actors with frontend positions
+    useEffect(() => {
+        if (!gameState?.live_actors) return;
+
+        // Simple deterministic spawn points for the hackathon Demo
+        const spawnPoints = [
+            { x: 38, y: 45 },
+            { x: 62, y: 38 },
+            { x: 50, y: 22 },
+            { x: 15, y: 15 },
+            { x: 80, y: 80 }
+        ];
+
+        setEnemies(prev => {
+            return gameState.live_actors.filter(la => la.role === "Enemy").map((liveActor, index) => {
+                const existing = prev.find(e => e.id === liveActor.actor_id);
+                return {
+                    id: liveActor.actor_id,
+                    name: `Monster ${liveActor.actor_id}`, // Fallback name
+                    hp: liveActor.current_hp,
+                    maxHp: 20, // Fallback max HP
+                    pos: existing ? existing.pos : spawnPoints[index % spawnPoints.length]
+                };
+            });
+        });
+    }, [gameState]);
 
     // Dice States
     const [showDiceOverlay, setShowDiceOverlay] = useState(false);
