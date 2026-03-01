@@ -45,7 +45,7 @@ Make sure you have [Node.js](https://nodejs.org/) installed on your machine.
 4. **Test the UI:**
    Open your browser and navigate to `http://localhost:5173/`.
    - **Move around:** Click on the tables, floors, or corridors in the central map to glide the player token.
-   - **Test collisions:** Try clicking within the black void outside the rooms—a red 'X' will flash, denying movement.
+   - **Test collisions:** Try clicking within the black void outside the rooms—your movement will be blocked.
    - **Roll a check:** Click the `ROLL CHECK` button in the bottom right to trigger the D20 dice overlay.
    - **Interact with the DM:** Type a message into the right panel and send it to see the simulated chat response.
 
