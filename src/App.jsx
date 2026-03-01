@@ -3,6 +3,7 @@ import CharacterSheet from "./components/CharacterSheet";
 import MainStage from "./components/MainStage";
 import DMConsole from "./components/DMConsole";
 import GameLauncher from "./components/GameLauncher";
+import PlayerCreator from "./components/PlayerCreator";
 import { GameProvider, useGame } from "./contexts/GameContext";
 
 function MainApp() {
@@ -21,11 +22,14 @@ function MainApp() {
   }
 
   return (
-    <div className="h-screen w-screen overflow-hidden grid grid-cols-[1fr_3fr_1fr] bg-slate-950">
-      <CharacterSheet />
-      <MainStage />
-      <DMConsole />
-    </div>
+    <>
+      <div className="h-screen w-screen overflow-hidden grid grid-cols-[1fr_3fr_1fr] bg-slate-950">
+        <CharacterSheet />
+        <MainStage />
+        <DMConsole />
+      </div>
+      <PlayerCreator />
+    </>
   );
 }
 

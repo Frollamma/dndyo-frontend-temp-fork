@@ -1,5 +1,9 @@
-import React, { createContext, useContext, useState } from 'react';
-import { createGame as createGameApi, getGameState } from '../services/api';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  createGame as createGameApi,
+  createActor,
+  getGameState,
+} from '../services/api';
 
 const GameContext = createContext();
 
@@ -8,15 +12,56 @@ export function GameProvider({ children }) {
   const [gameState, setGameState] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [playerError, setPlayerError] = useState(null);
+  const [isCreatingPlayer, setIsCreatingPlayer] = useState(false);
+  const [playerActor, setPlayerActor] = useState(null);
 
-  const handleError = (err) => {
+  const playerId = useMemo(
+    () => playerActor?.id ?? playerActor?.actor_id ?? null,
+    [playerActor],
+  );
+
+  const handleError = (setter) => (err) => {
     console.error('GameContext error:', err);
-    setError(err?.message || 'Something went wrong');
+    setter(err?.message || 'Something went wrong');
   };
+
+  const storageKey = (id) => `dndyo-player-${id}`;
+
+  useEffect(() => {
+    if (!gameId) {
+      setPlayerActor(null);
+      return;
+    }
+    if (typeof window === 'undefined') return;
+
+    try {
+      const saved = window.localStorage.getItem(storageKey(gameId));
+      if (saved) {
+        setPlayerActor(JSON.parse(saved));
+      }
+    } catch {
+      // ignore
+    }
+  }, [gameId]);
+
+  useEffect(() => {
+    if (!gameId || !playerActor || typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem(storageKey(gameId), JSON.stringify(playerActor));
+    } catch {
+      // ignore
+    }
+  }, [gameId, playerActor]);
 
   const loadGameState = async (id) => {
     const state = await getGameState(id);
     setGameState(state);
+    const player = state?.live_actors?.find((actor) => actor.role === 'Player');
+    if (player) {
+      setPlayerActor(player);
+    }
+    return state;
   };
 
   const createGame = async (config) => {
@@ -27,7 +72,7 @@ export function GameProvider({ children }) {
       setGameId(game.id);
       await loadGameState(game.id);
     } catch (err) {
-      handleError(err);
+      handleError(setError)(err);
     } finally {
       setIsLoading(false);
     }
@@ -40,16 +85,33 @@ export function GameProvider({ children }) {
       await loadGameState(id);
       setGameId(id);
     } catch (err) {
-      handleError(err);
+      handleError(setError)(err);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const createPlayer = async (actorPayload) => {
+    if (!gameId) {
+      setPlayerError('Game not ready yet');
+      return;
+    }
+    setIsCreatingPlayer(true);
+    setPlayerError(null);
+    try {
+      const created = await createActor(gameId, actorPayload);
+      setPlayerActor(created);
+      await loadGameState(gameId);
+    } catch (err) {
+      handleError(setPlayerError)(err);
+    } finally {
+      setIsCreatingPlayer(false);
+    }
+  };
+
   const fetchState = async () => {
     if (!gameId) return;
-    const state = await getGameState(gameId);
-    setGameState(state);
+    await loadGameState(gameId);
   };
 
   return (
@@ -62,6 +124,11 @@ export function GameProvider({ children }) {
         error,
         createGame,
         joinGame,
+        createPlayer,
+        isCreatingPlayer,
+        playerError,
+        playerActor,
+        playerId,
       }}
     >
       {children}

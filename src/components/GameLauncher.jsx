@@ -19,7 +19,7 @@ const serializeList = (value = "") =>
     .filter(Boolean);
 
 export default function GameLauncher() {
-  const { createGame, joinGame, isLoading, error } = useGame();
+  const { createGame, joinGame, isLoading, error, gameId } = useGame();
   const [formData, setFormData] = useState(defaults);
   const [joinId, setJoinId] = useState("");
 
@@ -72,7 +72,7 @@ export default function GameLauncher() {
           </p>
         </div>
 
-        {error && !isLoading && (
+        {error && !isLoading && !gameId && (
           <div className="rounded border border-rose-500/60 bg-rose-500/10 p-4 text-sm text-rose-200">
             {error}
           </div>

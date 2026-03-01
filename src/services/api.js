@@ -75,6 +75,16 @@ export async function runAIResponse(gameId, onChunk) {
   return fullText;
 }
 
+export async function createActor(gameId, actorPayload) {
+  const res = await fetch(`${API_BASE_URL}/${gameId}/actor/actor`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(actorPayload),
+  });
+  if (!res.ok) throw new Error("Failed to create player");
+  return res.json();
+}
+
 export async function attackLiveActor(
   gameId,
   liveActorId,
