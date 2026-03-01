@@ -57,8 +57,15 @@ export default function GameLauncher() {
   const disabled = isLoading;
 
   return (
-    <div className="min-h-screen w-screen bg-slate-950 text-amber-50 flex items-center justify-center py-12 px-4">
-      <div className="w-full max-w-5xl space-y-8">
+    /* FIX: Removed w-screen and items-center. 
+      Using min-h-screen with items-start ensures that if the content is taller 
+      than the screen, it starts at the top and scrolls naturally.
+    */
+    <div className="min-h-screen w-full bg-slate-950 text-amber-50 flex justify-center items-start overflow-y-auto py-12 px-4">
+      {/* FIX: my-auto allows the content to center itself vertically IF there is extra space,
+        but it won't push the top of the form off-screen if the form is tall.
+      */}
+      <div className="w-full max-w-5xl space-y-8 my-auto">
         <div className="text-center space-y-2">
           <p className="text-sm uppercase tracking-[0.4em] text-amber-400">
             Adventure Lobby
@@ -67,8 +74,7 @@ export default function GameLauncher() {
             Create or join a campaign
           </h1>
           <p className="text-base text-slate-300">
-            Start fresh with your own narrative or tap into an existing table
-            using its game ID.
+            Start fresh with your own narrative or tap into an existing table.
           </p>
         </div>
 
@@ -78,109 +84,125 @@ export default function GameLauncher() {
           </div>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2 items-start">
+          {/* CREATE SECTION */}
           <section className="rounded-2xl border border-amber-500/30 bg-slate-900/60 p-6 shadow-[0_0_60px_rgba(250,204,21,0.08)]">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-semibold tracking-tight">
-                Create a new game
+                New Game
               </h2>
-              <span className="text-sm text-amber-300">Fresh world</span>
+              <span className="text-sm text-amber-300 font-serif-dm italic">
+                World Building
+              </span>
             </div>
+
             <form className="mt-6 space-y-4" onSubmit={handleCreate}>
-              <label className="flex flex-col text-sm text-slate-200">
-                <span className="text-xs uppercase tracking-widest text-amber-300">
-                  Game name
-                </span>
-                <input
-                  className="mt-2 rounded bg-slate-800 px-3 py-2 text-base text-white focus:outline-2 focus:outline-amber-500"
-                  value={formData.name}
-                  onChange={handleFormChange("name")}
-                  disabled={disabled}
-                />
-              </label>
-              <label className="flex flex-col text-sm text-slate-200">
-                <span className="text-xs uppercase tracking-widest text-amber-300">
-                  Owner
-                </span>
-                <input
-                  className="mt-2 rounded bg-slate-800 px-3 py-2 text-base text-white focus:outline-2 focus:outline-amber-500"
-                  value={formData.owner}
-                  onChange={handleFormChange("owner")}
-                  disabled={disabled}
-                />
-              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <label className="flex flex-col text-sm text-slate-200">
+                  <span className="text-xs uppercase tracking-widest text-amber-300">
+                    Game Name
+                  </span>
+                  <input
+                    className="mt-2 rounded bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-amber-500 focus:outline-none"
+                    value={formData.name}
+                    onChange={handleFormChange("name")}
+                    disabled={disabled}
+                  />
+                </label>
+                <label className="flex flex-col text-sm text-slate-200">
+                  <span className="text-xs uppercase tracking-widest text-amber-300">
+                    Owner
+                  </span>
+                  <input
+                    className="mt-2 rounded bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-amber-500 focus:outline-none"
+                    value={formData.owner}
+                    onChange={handleFormChange("owner")}
+                    disabled={disabled}
+                  />
+                </label>
+              </div>
+
               <label className="flex flex-col text-sm text-slate-200">
                 <span className="text-xs uppercase tracking-widest text-amber-300">
                   AI DM prompt
                 </span>
                 <textarea
                   rows={3}
-                  className="mt-2 rounded bg-slate-800 px-3 py-2 text-base text-white focus:outline-2 focus:outline-amber-500"
+                  className="mt-2 rounded bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-amber-500 focus:outline-none"
                   value={formData.aiPrompt}
                   onChange={handleFormChange("aiPrompt")}
                   disabled={disabled}
                 />
               </label>
+
               <label className="flex flex-col text-sm text-slate-200">
                 <span className="text-xs uppercase tracking-widest text-amber-300">
-                  Environment description
+                  Environment
                 </span>
                 <textarea
                   rows={2}
-                  className="mt-2 rounded bg-slate-800 px-3 py-2 text-base text-white focus:outline-2 focus:outline-amber-500"
+                  className="mt-2 rounded bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-amber-500 focus:outline-none"
                   value={formData.environment}
                   onChange={handleFormChange("environment")}
                   disabled={disabled}
                 />
               </label>
-              <label className="flex flex-col text-sm text-slate-200">
-                <span className="text-xs uppercase tracking-widest text-amber-300">
-                  Chapters (one per line)
-                </span>
-                <textarea
-                  rows={3}
-                  className="mt-2 rounded bg-slate-800 px-3 py-2 text-base text-white focus:outline-2 focus:outline-amber-500"
-                  value={formData.chapters}
-                  onChange={handleFormChange("chapters")}
-                  disabled={disabled}
-                />
-              </label>
-              <label className="flex flex-col text-sm text-slate-200">
-                <span className="text-xs uppercase tracking-widest text-amber-300">
-                  Current chapters (optional)
-                </span>
-                <textarea
-                  rows={2}
-                  className="mt-2 rounded bg-slate-800 px-3 py-2 text-base text-white focus:outline-2 focus:outline-amber-500"
-                  value={formData.currentChapters}
-                  onChange={handleFormChange("currentChapters")}
-                  disabled={disabled}
-                />
-              </label>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <label className="flex flex-col text-sm text-slate-200">
+                  <span className="text-xs uppercase tracking-widest text-amber-300">
+                    Chapters
+                  </span>
+                  <textarea
+                    rows={3}
+                    className="mt-2 rounded bg-slate-800 border border-slate-700 px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
+                    value={formData.chapters}
+                    onChange={handleFormChange("chapters")}
+                    disabled={disabled}
+                  />
+                </label>
+                <label className="flex flex-col text-sm text-slate-200">
+                  <span className="text-xs uppercase tracking-widest text-amber-300">
+                    Current Progress
+                  </span>
+                  <textarea
+                    rows={3}
+                    className="mt-2 rounded bg-slate-800 border border-slate-700 px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
+                    value={formData.currentChapters}
+                    onChange={handleFormChange("currentChapters")}
+                    disabled={disabled}
+                  />
+                </label>
+              </div>
+
               <button
                 type="submit"
                 disabled={disabled}
-                className="w-full rounded-full bg-gradient-to-r from-amber-500 to-amber-400 py-3 text-base font-semibold uppercase tracking-widest text-slate-950 transition hover:opacity-90 disabled:cursor-wait disabled:opacity-60"
+                className="w-full rounded-full bg-gradient-to-r from-amber-600 to-amber-500 py-3 mt-4 text-base font-bold uppercase tracking-widest text-slate-950 transition hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
               >
                 {isLoading ? "Preparing adventure…" : "Create game"}
               </button>
             </form>
           </section>
 
-          <section className="rounded-2xl border border-slate-700 bg-slate-900/60 p-6 shadow-[0_0_60px_rgba(56,189,248,0.08)]">
+          {/* JOIN SECTION */}
+          {/* Added lg:sticky so it stays visible while scrolling the long form next to it */}
+          <section className="rounded-2xl border border-slate-700 bg-slate-900/60 p-6 shadow-[0_0_60px_rgba(56,189,248,0.08)] lg:sticky lg:top-12">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold tracking-tight">
+              <h2 className="text-xl font-semibold tracking-tight text-white">
                 Join a game
               </h2>
-              <span className="text-sm text-sky-300">Use a game ID</span>
+              <span className="text-sm text-sky-300 font-serif-dm italic">
+                Existing World
+              </span>
             </div>
             <p className="mt-3 text-sm text-slate-400">
-              Paste a game ID provided by another player or the DM and dive in.
+              Enter the Game ID provided by your DM.
             </p>
             <form className="mt-6 space-y-3" onSubmit={handleJoin}>
               <input
-                placeholder="Game ID"
-                className="w-full rounded bg-slate-800 px-3 py-3 text-lg text-white placeholder:text-slate-500 focus:outline-2 focus:outline-sky-500"
+                placeholder="Paste Game ID..."
+                className="w-full rounded bg-slate-800 border border-slate-700 px-3 py-3 text-lg text-white placeholder:text-slate-600 focus:border-sky-500 focus:outline-none"
                 value={joinId}
                 onChange={(event) => setJoinId(event.target.value)}
                 disabled={disabled}
@@ -188,7 +210,7 @@ export default function GameLauncher() {
               <button
                 type="submit"
                 disabled={disabled || !joinId.trim()}
-                className="w-full rounded-full border border-sky-500/60 bg-slate-900/70 py-3 text-base font-semibold tracking-widest text-sky-200 transition hover:border-sky-400 hover:text-white disabled:cursor-wait disabled:opacity-60"
+                className="w-full rounded-full border border-sky-500/60 bg-slate-900/70 py-3 text-base font-semibold tracking-widest text-sky-200 transition hover:bg-sky-500/10 hover:text-white disabled:opacity-50"
               >
                 {isLoading ? "Resolving game…" : "Join game"}
               </button>

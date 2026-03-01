@@ -1,9 +1,15 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   createGame as createGameApi,
   createActor,
   getGameState,
-} from '../services/api';
+} from "../services/api";
 
 const GameContext = createContext();
 
@@ -22,8 +28,8 @@ export function GameProvider({ children }) {
   );
 
   const handleError = (setter) => (err) => {
-    console.error('GameContext error:', err);
-    setter(err?.message || 'Something went wrong');
+    console.error("GameContext error:", err);
+    setter(err?.message || "Something went wrong");
   };
 
   const storageKey = (id) => `dndyo-player-${id}`;
@@ -33,7 +39,7 @@ export function GameProvider({ children }) {
       setPlayerActor(null);
       return;
     }
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     try {
       const saved = window.localStorage.getItem(storageKey(gameId));
@@ -46,9 +52,12 @@ export function GameProvider({ children }) {
   }, [gameId]);
 
   useEffect(() => {
-    if (!gameId || !playerActor || typeof window === 'undefined') return;
+    if (!gameId || !playerActor || typeof window === "undefined") return;
     try {
-      window.localStorage.setItem(storageKey(gameId), JSON.stringify(playerActor));
+      window.localStorage.setItem(
+        storageKey(gameId),
+        JSON.stringify(playerActor),
+      );
     } catch {
       // ignore
     }
@@ -57,7 +66,7 @@ export function GameProvider({ children }) {
   const loadGameState = async (id) => {
     const state = await getGameState(id);
     setGameState(state);
-    const player = state?.live_actors?.find((actor) => actor.role === 'Player');
+    const player = state?.live_actors?.find((actor) => actor.role === "Player");
     if (player) {
       setPlayerActor(player);
     }
@@ -93,7 +102,7 @@ export function GameProvider({ children }) {
 
   const createPlayer = async (actorPayload) => {
     if (!gameId) {
-      setPlayerError('Game not ready yet');
+      setPlayerError("Game not ready yet");
       return;
     }
     setIsCreatingPlayer(true);
