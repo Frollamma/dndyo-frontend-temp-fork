@@ -4,32 +4,32 @@ import { character } from "../data/mockData";
 
 /*  Walkable Areas (Static map collision)  */
 const walkableAreas = [
-    // Central Room
-    { xMin: 29, xMax: 71, yMin: 25, yMax: 65 },
+    // Central Room (With Padding)
+    { xMin: 31, xMax: 69, yMin: 27, yMax: 63 },
     // South Corridor
-    { xMin: 42, xMax: 58, yMin: 65, yMax: 95 },
+    { xMin: 44, xMax: 56, yMin: 63, yMax: 93 },
     // North Fireplace Room
-    { xMin: 35, xMax: 65, yMin: 18, yMax: 25 },
+    { xMin: 37, xMax: 63, yMin: 20, yMax: 25 },
     // West Corridor
-    { xMin: 20, xMax: 30, yMin: 42, yMax: 58 },
+    { xMin: 22, xMax: 28, yMin: 42, yMax: 56 },
     // East Corridor
-    { xMin: 70, xMax: 80, yMin: 42, yMax: 58 },
+    { xMin: 72, xMax: 78, yMin: 42, yMax: 56 },
     // NW Room
-    { xMin: 4, xMax: 28, yMin: 4, yMax: 30 },
+    { xMin: 6, xMax: 26, yMin: 6, yMax: 28 },
     // NE Room
-    { xMin: 72, xMax: 96, yMin: 4, yMax: 30 },
+    { xMin: 74, xMax: 94, yMin: 6, yMax: 28 },
     // SW Room
-    { xMin: 4, xMax: 30, yMin: 68, yMax: 96 },
+    { xMin: 6, xMax: 28, yMin: 70, yMax: 94 },
     // SE Room
-    { xMin: 70, xMax: 97, yMin: 68, yMax: 96 },
+    { xMin: 72, xMax: 95, yMin: 70, yMax: 94 },
     // Vertical Corridors connecting corner rooms
-    { xMin: 10, xMax: 20, yMin: 30, yMax: 68 }, // West interconnect
-    { xMin: 80, xMax: 90, yMin: 30, yMax: 68 }, // East interconnect
+    { xMin: 12, xMax: 18, yMin: 28, yMax: 70 }, // West interconnect
+    { xMin: 82, xMax: 88, yMin: 28, yMax: 70 }, // East interconnect
     // Horizontal Corridors connecting corner rooms to center
-    { xMin: 28, xMax: 42, yMin: 10, yMax: 20 }, // NW to North
-    { xMin: 58, xMax: 72, yMin: 10, yMax: 20 }, // NE to North
-    { xMin: 28, xMax: 42, yMin: 80, yMax: 90 }, // SW to South
-    { xMin: 58, xMax: 72, yMin: 80, yMax: 90 }, // SE to South
+    { xMin: 26, xMax: 44, yMin: 12, yMax: 18 }, // NW to North
+    { xMin: 56, xMax: 74, yMin: 12, yMax: 18 }, // NE to North
+    { xMin: 26, xMax: 44, yMin: 82, yMax: 88 }, // SW to South
+    { xMin: 56, xMax: 74, yMin: 82, yMax: 88 }, // SE to South
 ];
 
 const isValidMove = (x, y) => {
@@ -43,9 +43,9 @@ export default function MainStage() {
     const [playerPos, setPlayerPos] = useState({ x: 50, y: 80 });
     const [invalidMoveMarker, setInvalidMoveMarker] = useState(null);
     const [enemies] = useState([
-        { id: 1, name: "Goblin Raider", hp: 12, maxHp: 15, pos: { x: 30, y: 40 } },
-        { id: 2, name: "Dire Wolf", hp: 20, maxHp: 20, pos: { x: 70, y: 35 } },
-        { id: 3, name: "Cultist", hp: 5, maxHp: 10, pos: { x: 50, y: 15 } },
+        { id: 1, name: "Goblin Raider", hp: 12, maxHp: 15, pos: { x: 38, y: 45 } },
+        { id: 2, name: "Dire Wolf", hp: 20, maxHp: 20, pos: { x: 62, y: 38 } },
+        { id: 3, name: "Cultist", hp: 5, maxHp: 10, pos: { x: 50, y: 22 } },
     ]);
 
     // Dice States
